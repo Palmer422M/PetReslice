@@ -274,14 +274,15 @@ def write_resampled_vol(outdir, res_vol, res_z, rev, ds0, suv_dmax):
         if "WindowWidth" in ds0:
             del ds0.WindowWidth
     else:
+        print('RI, RS', ds0.RescaleIntercept, ds0.RescaleSlope)
         vox_min = -ds0.RescaleIntercept / ds0.RescaleSlope
         vox_max = (suv_dmax / suvscl - ds0.RescaleIntercept) / ds0.RescaleSlope
         print('vox min, max', vox_min, vox_max)
         ds0.WindowWidth = int(vox_max - vox_min)
         ds0.WindowCenter = ds0.WindowWidth // 2
 
-        test_val = suvscl * (ds0.RescaleIntercept + ds0.RescaleSlope * vox_max)
-        print('test_val: ', test_val)
+        #test_val = suvscl * (ds0.RescaleIntercept + ds0.RescaleSlope * vox_max)
+        #print('test_val: ', test_val)
 
     #ds0.WindowCenter = int((vpx_min+vpx_max)/2)
     #ds0.WindowWidth = int(vpx_max - vpx_min)
@@ -418,7 +419,7 @@ def do_resample(indir, outdir, method, suv_dmax):
             continue
         vol_ds += [ds]
 
-    print(len(vol_ds))
+    #print(len(vol_ds))
 
     vol_ds = sorted(vol_ds, key= lambda ipp: ipp.ImagePositionPatient[2]) # Sort by z-location
     # so z is monotonic, increasing
@@ -427,7 +428,7 @@ def do_resample(indir, outdir, method, suv_dmax):
     #print(z)
 
     scaled_vol = np.array([ds.RescaleIntercept + ds.pixel_array.astype(float) * ds.RescaleSlope for ds in vol_ds ])
-    print(scaled_vol.shape)
+    print(scaled_vol.shape, end=' -> ')
 
     resampled_vol, resampled_z = reslice(scaled_vol, z, method)
 
